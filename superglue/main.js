@@ -60,6 +60,8 @@
 
             // Get ink to generate the next paragraph
             var paragraphText = story.Continue();
+            // Flag telling whether to create or not a new paragraph
+            var createNewParagraph = true;
             var tags = story.currentTags;
 
             // Any special tags included with this line
@@ -138,19 +140,33 @@
                         return;
                     }
                 }
+                else if( tag == "superglue" || tag == "SUPERGLUE" ) {
+                    createNewParagraph = false;
+                }
             }
+            var elementToAdd;
+            // Check if there's a previous paragraph
+            var previousParagraph = storyContainer.querySelector("p:last-child");
 
-            // Create paragraph element (initially hidden)
-            var paragraphElement = document.createElement('p');
-            paragraphElement.innerHTML = paragraphText;
-            storyContainer.appendChild(paragraphElement);
+            if (createNewParagraph || !previousParagraph) {
+                // Create paragraph element (initially hidden)
+                elementToAdd = document.createElement("p");
+                elementToAdd.innerHTML = paragraphText;
+                storyContainer.appendChild(elementToAdd);
+            } else {
+                // Create a span instead
+                elementToAdd = document.createElement("span");
+                elementToAdd.innerHTML = paragraphText;
+                // and append it to the previous paragraph
+                previousParagraph.appendChild(elementToAdd);
+            }
 
             // Add any custom classes derived from ink tags
             for(var i=0; i<customClasses.length; i++)
-                paragraphElement.classList.add(customClasses[i]);
+                elementToAdd.classList.add(customClasses[i]);
 
             // Fade in paragraph after a short delay
-            showAfter(delay, paragraphElement);
+            showAfter(delay, elementToAdd);
             delay += 200.0;
         }
 
